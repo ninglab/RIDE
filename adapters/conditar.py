@@ -15,16 +15,16 @@ BASE_MODEL_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_
 if BASE_MODEL_ROOT not in sys.path:
     sys.path.insert(0, BASE_MODEL_ROOT)
 
-from models.molopt_score_model import (          # noqa: E402
+from models.molopt_score_model import (          
     ScorePosNet3D, center_pos, index_to_log_onehot, log_sample_categorical,
 )
-import utils.transforms as conditar_trans            # noqa: E402
-import utils.data as conditar_data                   # noqa: E402
-import utils.reconstruct as conditar_reconstruct      # noqa: E402
-from datasets import get_dataset                  # noqa: E402
-from datasets.mol_data import FOLLOW_BATCH         # noqa: E402
-from torch_geometric.data import Batch             # noqa: E402
-from torch_geometric.transforms import Compose     # noqa: E402
+import utils.transforms as conditar_trans            
+import utils.data as conditar_data                   
+import utils.reconstruct as conditar_reconstruct      
+from datasets import get_dataset                  
+from datasets.mol_data import FOLLOW_BATCH         
+from torch_geometric.data import Batch             
+from torch_geometric.transforms import Compose     
 
 
 _POCKET_CONFIG = {
