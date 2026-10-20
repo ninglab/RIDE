@@ -11,7 +11,7 @@ BASE_MODEL_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_
 if BASE_MODEL_ROOT not in sys.path:
     sys.path.insert(0, BASE_MODEL_ROOT)
 
-from causal_analysis_scaffold import (        # noqa: E402
+from causal_analysis_scaffold import (        
     ScaffoldDiffusion, build_molecules_batched, com_free_randn, com_project,
     load_complex, load_model,
 )
