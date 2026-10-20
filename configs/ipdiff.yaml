@@ -1,0 +1,29 @@
+model: ipdiff
+ckpt: checkpoints/ipdiff/ipdiff.pt   
+batch_size: 300
+discrete_forward_sample: false   
+
+t1_grid:
+  N: 10
+  n1: 5
+  n2: 9
+L: 100
+
+segment_selection:
+  K: 100
+  2d_weight: 1.0
+  3d_weight: 0.0
+
+value_guided_sampling:
+  value_resample_start: 40
+  value_resample_end: 10
+  resample_stride: 1
+  value_expand_children: 10
+  value_parent_cap: 3
+  M: 1000
+  num_sample: 100
+  reward:
+    2d_weight: 0.8
+    3d_weight: 0.0
+    qed_weight: 0.2
+    sa_weight: 0.0

@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pt
+*.ckpt
+
+# Model checkpoints
+*.pt
+*.ckpt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Other temporary files
+.DS_Store
+base_model/MANIFEST.md
