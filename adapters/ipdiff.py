@@ -13,16 +13,16 @@ BASE_MODEL_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(_
 if BASE_MODEL_ROOT not in sys.path:
     sys.path.insert(0, BASE_MODEL_ROOT)
 
-import utils.transforms as trans                                    # noqa: E402
-from datasets.pl_data import FOLLOW_BATCH                            # noqa: E402
-from graphbap.bapnet import BAPNet                                   # noqa: E402
-from models.molopt_score_model import (                              # noqa: E402
+import utils.transforms as trans                                   
+from datasets.pl_data import FOLLOW_BATCH                            
+from graphbap.bapnet import BAPNet                                   
+from models.molopt_score_model import (                              
     ScorePosNet3D, center_pos, extract, index_to_log_onehot, log_sample_categorical,
 )
-from torch_geometric.data import Batch                               # noqa: E402
-from torch_geometric.transforms import Compose                       # noqa: E402
-from utils import reconstruct as ipdiff_reconstruct                  # noqa: E402
-from ddpm_inversion_scaffold import build_shift_table, load_complex, to_real  # noqa: E402
+from torch_geometric.data import Batch                               
+from torch_geometric.transforms import Compose                       
+from utils import reconstruct as ipdiff_reconstruct                  
+from ddpm_inversion_scaffold import build_shift_table, load_complex, to_real  
 
 
 class IPDiffAdapter(ModelAdapter):
