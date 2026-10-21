@@ -4,10 +4,11 @@ import os
 
 from ride.perturbation_segment_selection.presearch import select_t1
 from ride.utils.trajectory import InversionPayload
-from scripts._common import add_model_args, build_adapter, load_config, resolve_complex
+from scripts._common import add_model_args, build_adapter, load_config, resolve_complex, set_deterministic
 
 
 def main():
+    set_deterministic()
     p = add_model_args(argparse.ArgumentParser(), require_complex=False)
     p.add_argument('--inversion_path', required=True)
     p.add_argument('--out_csv', default=None)

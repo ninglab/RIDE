@@ -1,5 +1,7 @@
 import importlib
+import os
 
+import torch
 import yaml
 
 _ADAPTER_MODULES = {
@@ -7,6 +9,13 @@ _ADAPTER_MODULES = {
     'conditar': ('adapters.conditar', 'ConditarAdapter'),
     'diffhopp': ('adapters.diffhopp', 'DiffHoppAdapter'),
 }
+
+
+def set_deterministic():
+    os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 def build_adapter(model_name: str, ckpt_path: str, device: str = 'cuda',

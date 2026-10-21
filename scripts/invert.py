@@ -1,10 +1,11 @@
 import argparse
 
 from ride.reference_trajectory_recovery.invert import recover_reference_trajectory
-from scripts._common import add_model_args, build_adapter, load_config
+from scripts._common import add_model_args, build_adapter, load_config, set_deterministic
 
 
 def main():
+    set_deterministic()
     p = add_model_args(argparse.ArgumentParser())
     p.add_argument('--out', required=True)
     args = p.parse_args()

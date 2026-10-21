@@ -36,10 +36,10 @@ def collect_endpoints(adapter: ModelAdapter, ctx: ReferenceContext,
             raise ValueError('branch_time is required when collect_full_perturb_num < M')
 
     capture_times = (window.t2,) if branch_time is None else (branch_time, window.t2)
-    ctx_full, _, captures = perturb(adapter, ctx, inversion, window, capture_times=capture_times,
-                                    B=full_n, label='full_n', batch_size=batch_size,
-                                    bar_name='collect')
-    full_mols = adapter.decode_batch(captures[window.t2], ctx_full)
+    ctx_full, state_full, captures = perturb(adapter, ctx, inversion, window, capture_times=capture_times,
+                                             B=full_n, label='full_n', batch_size=batch_size,
+                                             bar_name='collect')
+    full_mols = adapter.decode_batch(state_full, ctx_full)
     endpoints = list(zip(adapter.split_batch(captures[window.t2], full_n),
                          (compute_reward(mol, reference_mol, weights) for mol in full_mols)))
     branch_states = (adapter.split_batch(captures[branch_time], full_n)
@@ -51,7 +51,11 @@ def collect_endpoints(adapter: ModelAdapter, ctx: ReferenceContext,
                                   lambda cb, sb, b: _run_reverse(adapter, cb, sb, branch_time, window.t2,
                                                                  desc=f'collect[{branch_time}->{window.t2}] b={b}'),
                                   batch_size)
-        ctx_tail, state_tail = adapter.stack_batch(ctx, tail_states)
+        tail_final_states = run_batched(adapter, ctx, tail_states,
+                                        lambda cb, sb, b: _replay_to_zero(adapter, cb, sb, inversion, window.t2, b,
+                                                                          desc=f'replay[{window.t2}->0] b={b}'),
+                                        batch_size)
+        ctx_tail, state_tail = adapter.stack_batch(ctx, tail_final_states)
         tail_mols = adapter.decode_batch(state_tail, ctx_tail)
         endpoints += list(zip(tail_states, (compute_reward(mol, reference_mol, weights) for mol in tail_mols)))
     return endpoints, branch_states
@@ -77,6 +81,16 @@ def _run_reverse(adapter, ctx, state, t_from, t_to, desc=None):
     for t in steps:
         eps = adapter.sample_eps(state, t, ctx)
         state, _ = adapter.reverse_step(state, t, ctx, eps)
+    return state
+
+
+def _replay_to_zero(adapter, ctx, state, inversion, t_from, b, desc=None):
+    steps = range(t_from, 0, -1)
+    if desc is not None:
+        steps = tqdm(steps, desc=desc)
+    for tt in steps:
+        noise = inversion.noises[tt] if b == 1 else tile_eps(inversion.noises[tt], b)
+        state, _ = adapter.reverse_step(state, tt, ctx, noise)
     return state
 
 
@@ -127,10 +141,7 @@ def value_guided_search(adapter: ModelAdapter, ctx: ReferenceContext,
 
     def _survivor_tail(cb, sb, b):
         sb = _run_reverse(adapter, cb, sb, end_t, window.t2, desc=f'perturb[{end_t}->{window.t2}] b={b}')
-        for tt in tqdm(range(window.t2, 0, -1), desc=f'replay[{window.t2}->0] b={b}'):
-            noise = inversion.noises[tt] if b == 1 else tile_eps(inversion.noises[tt], b)
-            sb, _ = adapter.reverse_step(sb, tt, cb, noise)
-        return sb
+        return _replay_to_zero(adapter, cb, sb, inversion, window.t2, b, desc=f'replay[{window.t2}->0] b={b}')
     survivor_states = [s for s, _ in particles]
     final_states = run_batched(adapter, ctx, survivor_states, _survivor_tail, batch_size)
     ctx_s, state_s = adapter.stack_batch(ctx, final_states)
